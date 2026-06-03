@@ -2,6 +2,7 @@ name,category,x,z
 
 Capitala,orase,0,500
 Vestadin,orase,-915,50
+Zona Industrială,orase,-384,293
 
 Vecini,sate,-800,550
 Sat Desert,sate,-990,950
@@ -20,7 +21,6 @@ xXQualityTrashXx,bazex,-383,325
 DavidThedy,bazex,-383,325
 
 Restaurant Chinezesc,structuri,-890,493
-Zona Industrială,structuri,-384,293
 Turnir,structuri,58,240
 CezFour,structuri,-98,385
 

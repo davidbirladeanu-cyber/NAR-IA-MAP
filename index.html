@@ -52,10 +52,7 @@
             font-family: 'Consolas', monospace;
         }
 
-        .custom-pin-icon {
-            background: none !important;
-            border: none !important;
-        }
+        .custom-pin-icon { background: none !important; border: none !important; }
     </style>
 </head>
 <body>
@@ -71,13 +68,11 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- MATRICE GEOMETRICĂ AJUSTATĂ ---
         const imgWidth = 2048; const imgHeight = 1536;
         const bounds = [[0, 0], [imgHeight, imgWidth]];
-
         const centerImgX = 1024; const centerImgY = 768;
         
-        // Coordonate recalibrate pe baza ancorelor trimise
+        // Coordonate recalibrate pe baza ancorelor tale
         const scaleX = 1.39476664;
         const scaleZ = 1.42079143;
         const centerGameX = 59.3321312;
@@ -89,7 +84,6 @@
             return [lat, lng];
         }
 
-        // --- INIȚIALIZARE HARTĂ ---
         const map = L.map('map', {
             crs: L.CRS.Simple, minZoom: -1, maxZoom: 2,
             maxBounds: bounds, maxBoundsViscosity: 1.0
@@ -108,52 +102,35 @@
         };
 
         const categoriesMap = {
-            orase: "Orașe",
-            sate: "Sate",
-            baze: "Baze",
-            structuri: "Structuri",
-            metro: "Metro",
-            port: "Porturi"
+            orase: "Orașe", sate: "Sate", baze: "Baze", 
+            structuri: "Structuri", metro: "Metro", port: "Porturi"
         };
 
         const colorMap = {
-            orase: "#ff4d4d",      
-            sate: "#ff944d",       
-            baze: "#ffeb3b",       
-            structuri: "#4caf50",  
-            metro: "#2196f3",      
-            port: "#ba68c8"        
+            orase: "#ff4d4d", sate: "#ff944d", baze: "#ffeb3b", 
+            structuri: "#4caf50", metro: "#2196f3", port: "#ba68c8"
         };
 
         let lastFileContent = "";
 
-        // Generare Pin cu stroke negru de contrast
         function createPinIcon(color) {
             return L.divIcon({
                 html: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" 
-                              fill="${color}" 
-                              stroke="#000000" 
-                              stroke-width="1" 
-                              stroke-linejoin="round"/>
+                              fill="${color}" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
                        </svg>`,
                 className: 'custom-pin-icon',
-                iconSize: [26, 26],
-                iconAnchor: [13, 26],
-                popupAnchor: [0, -26]
+                iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -26]
             });
         }
 
-        // --- SIDEBAR UI ---
         function initSidebar() {
             const container = document.getElementById('categories-container');
-            container.innerHTML = '';
             Object.keys(categoriesMap).forEach(key => {
                 const color = colorMap[key];
                 container.innerHTML += `
                     <div class="cat-item" style="border-left: 4px solid ${color};">
-                        <label class="cat-label" for="chk-${key}">
-                            <input type="checkbox" id="chk-${key}" checked onchange="toggleLayer('${key}')">
+                        <label class="cat-label"><input type="checkbox" checked onchange="toggleLayer('${key}')">
                             <span style="color: ${color}; font-weight: bold;">${categoriesMap[key]}</span>
                         </label>
                     </div>`;
@@ -161,52 +138,31 @@
         }
 
         function toggleLayer(key) {
-            if (map.hasLayer(layers[key])) { map.removeLayer(layers[key]); } 
-            else { layers[key].addTo(map); }
+            if (map.hasLayer(layers[key])) map.removeLayer(layers[key]);
+            else layers[key].addTo(map);
         }
 
         function renderMarker(point) {
             const coords = minecraftToLeaflet(point.x, point.z);
             if (!layers[point.category]) return; 
-
-            const targetColor = colorMap[point.category];
-            const customIcon = createPinIcon(targetColor);
-
-            L.marker(coords, { icon: customIcon })
-                .bindPopup(`<b style="color:${targetColor};">${point.name}</b><br>Coordonate: X: ${point.x} | Z: ${point.z}<br>Tip: ${categoriesMap[point.category]}`)
-                .addTo(layers[point.category]);
+            L.marker(coords, { icon: createPinIcon(colorMap[point.category]) })
+             .bindPopup(`<b style="color:${colorMap[point.category]};">${point.name}</b>`)
+             .addTo(layers[point.category]);
         }
 
-        // --- AUTO-SYNC LOGIC ---
         async function fetchLocalCSV() {
             try {
-                const response = await fetch('./nartia_date.csv', { cache: "no-store" });
-                if (!response.ok) throw new Error("Fișierul nu a fost găsit.");
-
-                const text = await response.text();
+                const res = await fetch('./nartia_date.csv', { cache: "no-store" });
+                const text = await res.text();
                 if (text === lastFileContent) return;
                 lastFileContent = text;
-
-                Object.keys(layers).forEach(key => layers[key].clearLayers());
-
-                const lines = text.split("\n");
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-
-                    const parts = line.split(",");
-                    if (parts.length === 4) {
-                        renderMarker({
-                            name: parts[0],
-                            category: parts[1],
-                            x: parseFloat(parts[2]),
-                            z: parseFloat(parts[3])
-                        });
-                    }
-                }
-            } catch (error) {
-                console.warn("Sincronizarea automată eșuată. Necesită rulare prin Live Server local.");
-            }
+                Object.keys(layers).forEach(k => layers[k].clearLayers());
+                text.split("\n").forEach((line, i) => {
+                    if (i === 0 || !line.trim()) return;
+                    const [name, category, x, z] = line.split(",");
+                    renderMarker({name, category, x: parseFloat(x), z: parseFloat(z)});
+                });
+            } catch(e) {}
         }
 
         initSidebar();

@@ -176,11 +176,13 @@ let drawerOpen = false;
 
 // Variabile Timeline pe Zile
 let datedMarkers = [];
-let undatedMarkers = [];
 let timelineDays = []; // Stochează fiecare zi în milisecunde
 let isAnimating = false;
 let animInterval = null;
 let currentStep = -1; 
+
+// Data default pentru cele FĂRĂ dată: 7 Ianuarie 2026 (Ora 00:00:00)
+const DEFAULT_UNDATED_TS = new Date(2026, 0, 7, 0, 0, 0, 0).getTime();
 
 window.toggleDrawer = function() {
     drawerOpen = !drawerOpen;
@@ -207,7 +209,6 @@ function fmtDate(raw) {
     return raw.trim();
 }
 
-// Transformă timestamp-ul în string formatat frumos pt UI-ul animației
 function tsToDateString(ts) {
     if (!ts) return "Începuturi";
     const d = new Date(ts);
@@ -218,7 +219,6 @@ function tsToDateString(ts) {
 function parseTimestamp(raw) {
     if (!raw || !raw.trim()) return 0; 
     const s = raw.trim().replace(/\D/g,'');
-    // Generăm milisecunde la miezul nopții pentru ziua respectivă
     if (s.length === 8) return new Date(s.slice(4,8), parseInt(s.slice(2,4))-1, s.slice(0,2), 0, 0, 0, 0).getTime();
     return 0;
 }
@@ -279,18 +279,13 @@ function toggle(k) {
     drawStep(currentStep);
 }
 
-// Updatează numărătoarea (pinurile fără dată se pun la total doar când isEnd este adevărat)
-function updateCounts(currentTs, isEnd) {
+function updateCounts(currentTs) {
     let tempCounts = {};
     Object.keys(CATS).forEach(k => tempCounts[k] = 0);
     
     datedMarkers.forEach(item => {
         if (item.ts <= currentTs) tempCounts[item.cat]++;
     });
-    
-    if (isEnd) {
-        undatedMarkers.forEach(item => tempCounts[item.cat]++);
-    }
     
     Object.keys(CATS).forEach(k => {
         const v = tempCounts[k];
@@ -314,7 +309,6 @@ async function fetchCSV() {
         lastCSV = text;
 
         datedMarkers = [];
-        undatedMarkers = [];
         let minTs = Infinity;
         let maxTs = 0;
 
@@ -330,20 +324,26 @@ async function fetchCSV() {
             if (isNaN(x) || isNaN(z)) return;
             
             const pt = { name, cat, x, z, date: p[4]||'', img: p[5]||'' };
-            const ts = parseTimestamp(pt.date); 
+            let ts = parseTimestamp(pt.date); 
+            
+            // Dacă pinul nu are dată sau e invalidă, îl punem pe 07 Ian 2026
+            if (ts === 0) ts = DEFAULT_UNDATED_TS;
+
             const marker = L.marker(mc2ll(x, z), { icon: pin(CATS[cat].color) })
                 .bindPopup(buildPopup(pt), { maxWidth: 280 });
                 
-            if (ts > 0) {
-                datedMarkers.push({ marker, cat, ts, pt });
-                if (ts < minTs) minTs = ts;
-                if (ts > maxTs) maxTs = ts;
-            } else {
-                undatedMarkers.push({ marker, cat, ts, pt });
-            }
+            datedMarkers.push({ marker, cat, ts, pt });
+            if (ts < minTs) minTs = ts;
+            if (ts > maxTs) maxTs = ts;
         });
 
-        // Generăm array-ul cu FIECARĂ ZI dintre prima construcție și ultima
+        // Forțăm data de început să fie 7 Ianuarie a anului din minTs
+        // (va prinde clar 2026 din DEFAULT_UNDATED_TS dacă e printre ele)
+        if (minTs !== Infinity) {
+            const an = new Date(minTs).getFullYear();
+            minTs = new Date(an, 0, 7, 0, 0, 0, 0).getTime(); 
+        }
+
         timelineDays = [];
         if (minTs !== Infinity && maxTs !== 0) {
             let curr = new Date(minTs);
@@ -353,7 +353,7 @@ async function fetchCSV() {
             
             while (curr.getTime() <= end.getTime()) {
                 timelineDays.push(curr.getTime());
-                curr.setDate(curr.getDate() + 1); // adunăm o zi
+                curr.setDate(curr.getDate() + 1); 
             }
         }
 
@@ -370,25 +370,16 @@ async function fetchCSV() {
 function drawStep(step) {
     Object.keys(CATS).forEach(k => layers[k]?.clearLayers());
     
-    // Luăm timestamp-ul din ziua corespunzătoare pe care se află slider-ul
     const currentTs = timelineDays[step] || 0;
     let dateText = currentTs ? tsToDateString(currentTs) : "Începuturi";
     
-    // Flag care ne arată dacă suntem la finalul absolut al animației
-    const isEnd = (step >= timelineDays.length - 1);
-
-    // 1. Adăugăm pe hartă doar marker-ele construite PÂNĂ ÎN ziua respectivă (inclusiv)
     datedMarkers.forEach(item => {
         if (item.ts <= currentTs && visible[item.cat]) {
             item.marker.addTo(layers[item.cat]);
         }
     });
 
-    // 2. Pinurile FĂRĂ dată apar DOAR la 100% din animație
-    if (isEnd) {
-        undatedMarkers.forEach(item => {
-            if (visible[item.cat]) item.marker.addTo(layers[item.cat]);
-        });
+    if (step >= timelineDays.length - 1) {
         dateText = "Evoluție completă";
     }
 
@@ -400,7 +391,7 @@ function drawStep(step) {
     document.getElementById('timeline-slider-desk').value = step;
     document.getElementById('timeline-slider-mob').value = step;
     
-    updateCounts(currentTs, isEnd);
+    updateCounts(currentTs);
 }
 
 function toggleTimeline() {
@@ -428,7 +419,7 @@ function playTimeline() {
         if (currentStep >= timelineDays.length - 1) {
             pauseTimeline();
         }
-    }, 125);
+    }, 250); // 250 milisecunde = 4 zile pe secundă
 }
 
 function pauseTimeline() {

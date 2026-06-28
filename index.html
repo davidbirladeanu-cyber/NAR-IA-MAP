@@ -71,21 +71,28 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- MATRICE GEOMETRICĂ AJUSTATĂ (1440x1080) ---
-        const imgWidth = 1440; const imgHeight = 1080;
-        const bounds = [[0, 0], [imgHeight, imgWidth]];
-
-        const centerImgX = 720; const centerImgY = 540;
+        // --- 1. COORDONATELE EXTREME DIN MINECRAFT (Marginile Hărții) ---
+        const topLeftX = -1345;     // Cel mai vestic punct (Marginea din stânga)
+        const topLeftZ = -840;      // Cel mai nordic punct (Marginea de sus)
         
-        // Coordonate recalibrate (raport adaptat de la 2048x1536 la 1440x1080 pentru acuratețe vizuală 1:1)
-        const scaleX = 2.0579;
-        const scaleZ = 2.0479;
-        const centerGameX = -7.869;
-        const centerGameZ = 13.921;
+        const bottomRightX = 1500;  // Cel mai estic punct (Marginea din dreapta)
+        const bottomRightZ = 1250;  // Cel mai sudic punct (Marginea de jos)
 
+        // --- 2. DIMENSIUNILE IMAGINII ---
+        const mapWidth = 1440;
+        const mapHeight = 1080;
+        const bounds = [[0, 0], [mapHeight, mapWidth]];
+
+        // --- 3. FUNCȚIA CARE CALCULEAZĂ POZIȚIA EXACTĂ LA PIXEL ---
         function minecraftToLeaflet(x, z) {
-            const lng = centerImgX + (x - centerGameX) / scaleX;
-            const lat = centerImgY - (z - centerGameZ) / scaleZ;
+            // Aflăm la ce procent din lățimea/înălțimea hărții se află coordonata
+            const percentX = (x - topLeftX) / (bottomRightX - topLeftX);
+            const percentZ = (z - topLeftZ) / (bottomRightZ - topLeftZ);
+
+            // Transformăm procentele în coordonate pentru Leaflet (Lng, Lat)
+            const lng = percentX * mapWidth;
+            const lat = mapHeight - (percentZ * mapHeight);
+
             return [lat, lng];
         }
 
@@ -95,9 +102,12 @@
             maxBounds: bounds, maxBoundsViscosity: 1.0
         });
 
-        // Nu uita să te asiguri că fișierul 'image_d8de1d.jpg' a fost actualizat fizic la 1440x1080
-        L.imageOverlay('harta.jpg', bounds).addTo(map);
-        map.setView([centerImgY, centerImgX], 0);
+        // Anti-cache pentru imagine: adăugăm un timestamp generat automat
+        const imageUrl = 'harta.jpg?v=' + new Date().getTime();
+        L.imageOverlay(imageUrl, bounds).addTo(map);
+        
+        // Centrarea hărții la încărcare
+        map.setView([mapHeight / 2, mapWidth / 2], 0);
 
         const layers = {
             orase: L.layerGroup().addTo(map),
@@ -181,7 +191,10 @@
         // --- AUTO-SYNC LOGIC ---
         async function fetchLocalCSV() {
             try {
-                const response = await fetch('./nartia_date.csv', { cache: "no-store" });
+                // Anti-cache pentru CSV: adăugăm un timestamp generat automat
+                const csvUrl = './nartia_date.csv?v=' + new Date().getTime();
+                const response = await fetch(csvUrl, { cache: "no-store" });
+                
                 if (!response.ok) throw new Error("Fișierul nu a fost găsit.");
 
                 const text = await response.text();

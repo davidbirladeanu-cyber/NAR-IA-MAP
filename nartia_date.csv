@@ -1,28 +1,28 @@
 name,category,x,z
 
-Capitala,orase,20,450
-Vestadin,orase,-915,56
-Zona Industrială,orase,-396,291
-Ruine,orase,1097,183
+Capitala,oras,20,450
+Vestadin,oras,-915,56
+Zona Industrială,oras,-396,291
+Ruine,oras,1097,183
 
-Vecinii,sate,-807,551
-Sat Deșert,sate,-970,950
-Sat Savană,sate,-189,140
-Sat Câmpie,sate,92,268
-Sat Munte,sate,-171,-171
+Vecinii,sat,-807,551
+Sat Deșert,sat,-970,950
+Sat Savană,sat,-189,140
+Sat Câmpie,sat,92,268
+Sat Munte,sat,-171,-171
 
-Beatrice,baze,-605,892
-IoanaIM,baze,-248,906
-beelovesbees,baze,-53,608
-Ma_ta69,baze,155,426
-true,baze,172,497
-Cimpi,baze,1093,187
-xXQualityTrashXx,bazex,-381,318
-DavidThedy,bazex,-381,318
+Beatrice,baza,-605,892
+IoanaIM,baza,-248,906
+beelovesbees,baza,-53,608
+Ma_ta69,baza,155,426
+true,baza,172,497
+Cimpi,baza,1093,187
+xXQualityTrashXx,bazax,-381,318
+DavidThedy,bazax,-381,318
 
-Restaurant Chinezesc,structuri,-896,494
-Turnir,structuri,58,240
-CezFour,structuri,-98,385
+Restaurant Chinezesc,structura,-896,494
+Turnir,structura,58,240
+CezFour,structura,-98,385
 
 Metro Desert,metro,-1003,937
 Metro Polar,metro,1102,67

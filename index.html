@@ -77,21 +77,23 @@
         const maxZ = 1247;
 
         const categoriesMap = {
-            orase: "Orașe",
-            sate: "Sate",
-            baze: "Baze",
-            structuri: "Structuri",
-            metro: "Metro",
-            port: "Porturi"
+            oras: "Orașe",
+            sat: "Sate",
+            baza: "Baze",
+            structura: "Structuri",
+            metro: "Metrouri",
+            port: "Porturi",
+            pod: "Poduri"
         };
 
         const colorMap = {
-            orase: "#ff4d4d",      
-            sate: "#ff944d",       
-            baze: "#ffeb3b",       
-            structuri: "#4caf50",  
+            oras: "#ff4d4d",      
+            sat: "#ff944d",       
+            baza: "#ffeb3b",       
+            structura: "#4caf50",  
             metro: "#2196f3",      
-            port: "#ba68c8"        
+            port: "#ba68c8",
+            pod: "#e25098"
         };
 
         let map;
@@ -191,12 +193,13 @@
             map.setView([dynamicHeight / 2, dynamicWidth / 2], 0);
 
             layers = {
-                orase: L.layerGroup().addTo(map),
-                sate: L.layerGroup().addTo(map),
-                baze: L.layerGroup().addTo(map),
-                structuri: L.layerGroup().addTo(map),
+                oras: L.layerGroup().addTo(map),
+                sat: L.layerGroup().addTo(map),
+                baza: L.layerGroup().addTo(map),
+                structura: L.layerGroup().addTo(map),
                 metro: L.layerGroup().addTo(map),
-                port: L.layerGroup().addTo(map)
+                port: L.layerGroup().addTo(map),
+                pod: L.layerGroup().addTo(map)
             };
 
             initSidebar();

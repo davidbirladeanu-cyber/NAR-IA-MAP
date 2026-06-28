@@ -39,15 +39,21 @@
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         /* ── Timeline UI ── */
-        .timeline-ctrl { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
-        .btn-play { background: #3dba6f; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; outline: none; min-width: 68px; }
+        .timeline-ctrl { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
+        .timeline-header { display: flex; align-items: center; justify-content: space-between; }
+        .btn-play { background: #3dba6f; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; outline: none; min-width: 78px; }
         .btn-play:hover { opacity: 0.8; }
-        .anim-date-txt { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .anim-date-txt { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+        
+        .slider-wrapper { display: none; width: 100%; }
+        body.timeline-active .slider-wrapper { display: block; }
+        input[type=range] { -webkit-appearance: none; background: var(--line2); height: 5px; border-radius: 3px; outline: none; width: 100%; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #3dba6f; cursor: pointer; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line2); }
 
-        #map { flex: 1; height: 100%; background: var(--bg); }
+        #map { flex: 1; height: 100%; background: var(--bg); transition: padding-top 0.3s; }
 
         /* mobile hidden on desktop */
-        #mob-topbar, #mob-fab, #drawer-backdrop, #drawer { display: none; }
+        #mob-topbar, #mob-timeline-bar, #mob-fab, #drawer-backdrop, #drawer { display: none; }
 
         /* ── Mobile ── */
         @media (max-width: 640px) {
@@ -55,6 +61,11 @@
             #mob-topbar { display: flex; position: fixed; top: 0; left: 0; right: 0; height: 52px; background: var(--panel); border-bottom: 1px solid var(--line); align-items: center; padding: 0 16px; z-index: 2000; gap: 12px; }
             .mob-title { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; }
             .mob-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-left: auto; }
+            
+            #mob-timeline-bar { position: fixed; top: 52px; left: 0; right: 0; background: var(--panel); border-bottom: 1px solid var(--line); padding: 10px 16px; z-index: 1999; display: none; align-items: center; }
+            body.timeline-active #mob-timeline-bar { display: flex; }
+            body.timeline-active #map { padding-top: 85px; }
+
             #app { flex-direction: column; }
             #map { width: 100%; height: 100%; padding-top: 52px; }
             #mob-fab { display: flex; position: fixed; bottom: 24px; right: 16px; width: 52px; height: 52px; background: var(--panel); border: 1px solid var(--line2); border-radius: 50%; align-items: center; justify-content: center; cursor: pointer; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
@@ -103,8 +114,13 @@
         </div>
         
         <div class="timeline-ctrl">
-            <button class="btn-play" onclick="toggleTimeline()">▶ Play</button>
-            <div class="anim-date-txt" style="display: none;"></div>
+            <div class="timeline-header">
+                <button class="btn-play" onclick="toggleTimeline()">▶ Play</button>
+                <div class="anim-date-txt" style="display: none;"></div>
+            </div>
+            <div class="slider-wrapper">
+                <input type="range" id="timeline-slider-desk" min="0" value="0" step="1" oninput="scrubTimeline(this.value)">
+            </div>
         </div>
 
         <div class="s-section">Categorii</div>
@@ -118,10 +134,15 @@
     <span class="mob-title">Narția</span>
     
     <button class="btn-play" style="padding: 4px 10px; min-width: auto;" onclick="toggleTimeline()">▶</button>
-    <span class="anim-date-txt" style="display: none; flex: 1;"></span>
+    <span class="anim-date-txt" style="display: none; flex: 1; font-size: 11px;"></span>
     
     <span class="mob-live"><div class="pulse"></div>Live</span>
 </div>
+
+<div id="mob-timeline-bar">
+    <input type="range" id="timeline-slider-mob" min="0" value="0" step="1" style="width: 100%" oninput="scrubTimeline(this.value)">
+</div>
+
 <div id="mob-fab" onclick="toggleDrawer()">
     <svg viewBox="0 0 24 24" fill="none" stroke="#e2e2e4" stroke-width="1.8" stroke-linecap="round">
         <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
@@ -150,13 +171,15 @@ const CATS = {
 };
 
 let map, W, H;
-let layers = {}, drumOverlay = null, counts = {}, visible = {}, lastCSV = '';
+let layers = {}, drumOverlay = null, visible = {}, lastCSV = '';
 let drawerOpen = false;
 
-// Variabile noi pentru Animație
-let allMarkers = []; 
+// Variabile Timeline
+let datedMarkers = [];
+let undatedMarkers = [];
 let isAnimating = false;
 let animInterval = null;
+let currentStep = -1; 
 
 window.toggleDrawer = function() {
     drawerOpen = !drawerOpen;
@@ -164,7 +187,7 @@ window.toggleDrawer = function() {
     document.getElementById('drawer-backdrop').classList.toggle('open', drawerOpen);
 };
 
-// ── Pin ──────────────────────────────────────────
+// ── Pin & Formatări ──────────────────────────────
 function pin(color) {
     const s = 26;
     return L.divIcon({
@@ -174,7 +197,6 @@ function pin(color) {
     });
 }
 
-// ── Date ─────────────────────────────────────────
 function fmtDate(raw) {
     if (!raw || !raw.trim()) return null;
     const s = raw.trim().replace(/\D/g,'');
@@ -185,14 +207,10 @@ function fmtDate(raw) {
     return raw.trim();
 }
 
-// Creare timestamp sortabil (pentru ordonarea cronologică a animației)
 function parseTimestamp(raw) {
-    if (!raw || !raw.trim()) return 0; // Pentru pinurile vechi fără dată
+    if (!raw || !raw.trim()) return 0; 
     const s = raw.trim().replace(/\D/g,'');
-    if (s.length === 8) {
-        // ZZZZ-LL-AA -> An, Lună, Zi
-        return new Date(s.slice(4,8), parseInt(s.slice(2,4))-1, s.slice(0,2)).getTime();
-    }
+    if (s.length === 8) return new Date(s.slice(4,8), parseInt(s.slice(2,4))-1, s.slice(0,2)).getTime();
     return 0;
 }
 
@@ -218,7 +236,7 @@ function buildPopup(p) {
     </div>`;
 }
 
-// ── Sidebar rows ──────────────────────────────────
+// ── UI Sidebar ────────────────────────────────────
 function makeRow(k, isMobile) {
     const cat = CATS[k];
     const row = document.createElement('div');
@@ -251,30 +269,36 @@ function toggle(k) {
         return;
     }
     
-    // Nu ascundem/arătăm forțat straturile dacă rulează animația
-    if (isAnimating) return; 
-    
-    if (visible[k]) layers[k]?.addTo(map);
-    else layers[k] && map.removeLayer(layers[k]);
+    // Redesenează la pasul curent pentru a ascunde/arăta categoria
+    drawStep(currentStep);
 }
 
-function updateCounts() {
+function updateCounts(step) {
+    let tempCounts = {};
+    Object.keys(CATS).forEach(k => tempCounts[k] = 0);
+    
+    // Numărăm cele care au apărut până la pasul curent
+    for (let i = 0; i < step; i++) tempCounts[datedMarkers[i].cat]++;
+    
+    // Cele fără dată sunt adăugate la total doar când suntem la final
+    if (step >= datedMarkers.length) {
+        undatedMarkers.forEach(item => tempCounts[item.cat]++);
+    }
+    
     Object.keys(CATS).forEach(k => {
-        const v = counts[k] || 0;
+        const v = tempCounts[k];
         document.getElementById('desk-cnt-'+k) && (document.getElementById('desk-cnt-'+k).textContent = v);
         document.getElementById('mob-cnt-'+k)  && (document.getElementById('mob-cnt-'+k).textContent  = v);
     });
 }
 
-// ── Coords ───────────────────────────────────────
 function mc2ll(x, z) {
     return [H - ((z - minZ) / (maxZ - minZ)) * H, ((x - minX) / (maxX - minX)) * W];
 }
 
-// ── CSV ──────────────────────────────────────────
+// ── Preluare Date ────────────────────────────────
 async function fetchCSV() {
-    // Dacă rulează animația, suspendăm sincronizarea live a hărții
-    if (isAnimating) return; 
+    if (isAnimating) return; // Punem pe pauză sync-ul live când e animația pornită
 
     try {
         const r = await fetch('./nartia_date.csv?t=' + Date.now(), { cache:'no-store' });
@@ -283,8 +307,8 @@ async function fetchCSV() {
         if (text === lastCSV) return;
         lastCSV = text;
 
-        Object.keys(CATS).forEach(k => { layers[k]?.clearLayers(); counts[k] = 0; });
-        allMarkers = []; // Resetăm array-ul global pentru animație
+        datedMarkers = [];
+        undatedMarkers = [];
 
         text.split('\n').slice(1).forEach(line => {
             line = line.trim();
@@ -298,86 +322,110 @@ async function fetchCSV() {
             if (isNaN(x) || isNaN(z)) return;
             
             const pt = { name, cat, x, z, date: p[4]||'', img: p[5]||'' };
-            const ts = parseTimestamp(pt.date); // Extragem timestamp-ul numeric sortabil
+            const ts = parseTimestamp(pt.date); 
             const marker = L.marker(mc2ll(x, z), { icon: pin(CATS[cat].color) })
                 .bindPopup(buildPopup(pt), { maxWidth: 280 });
                 
-            // Le stocăm temporar în loc să le forțăm direct pe hartă
-            allMarkers.push({ marker, cat, ts, pt });
-            counts[cat] = (counts[cat]||0) + 1;
+            if (ts > 0) datedMarkers.push({ marker, cat, ts, pt });
+            else undatedMarkers.push({ marker, cat, ts, pt });
         });
 
-        // Adăugăm pe hartă normal dacă nu suntem în modul Animație
-        allMarkers.forEach(m => m.marker.addTo(layers[m.cat]));
-        updateCounts();
+        // Sortăm cronologic
+        datedMarkers.sort((a,b) => a.ts - b.ts);
+
+        // Actualizăm sliderele
+        const max = datedMarkers.length;
+        document.getElementById('timeline-slider-desk').max = max;
+        document.getElementById('timeline-slider-mob').max = max;
+
+        // Prima încărcare: le arătăm pe toate
+        if (currentStep === -1) currentStep = max;
+
+        drawStep(currentStep);
     } catch(e) { console.warn(e); }
 }
 
-// ── Funcții Timeline / Animație ─────────────────
+// ── Timeline Logic ───────────────────────────────
+function drawStep(step) {
+    // 1. Curățăm harta
+    Object.keys(CATS).forEach(k => layers[k]?.clearLayers());
+    
+    // 2. Adăugăm pinurile CU dată, până la progresul curent (slider)
+    for (let i = 0; i < step; i++) {
+        const item = datedMarkers[i];
+        if (visible[item.cat]) item.marker.addTo(layers[item.cat]);
+    }
+    
+    // 3. Setăm textul UI
+    let dateText = "Începuturi";
+    if (step > 0 && step <= datedMarkers.length) {
+        dateText = fmtDate(datedMarkers[step - 1].pt.date) || dateText;
+    }
+
+    // 4. Pinurile FĂRĂ dată apar DOAR la 100%
+    if (step >= datedMarkers.length) {
+        undatedMarkers.forEach(item => {
+            if (visible[item.cat]) item.marker.addTo(layers[item.cat]);
+        });
+        dateText = "Evoluție completă";
+    }
+
+    // 5. Actualizăm interfața vizuală
+    document.querySelectorAll('.anim-date-txt').forEach(d => {
+        d.style.display = 'block';
+        d.textContent = dateText;
+    });
+    document.getElementById('timeline-slider-desk').value = step;
+    document.getElementById('timeline-slider-mob').value = step;
+    
+    updateCounts(step);
+}
+
 function toggleTimeline() {
-    if (isAnimating) stopTimeline();
+    if (isAnimating) pauseTimeline();
     else playTimeline();
 }
 
 function playTimeline() {
-    if (allMarkers.length === 0) return;
+    if (datedMarkers.length === 0) return;
+    
+    // Dacă am ajuns la capăt, reîncepe automat
+    if (currentStep >= datedMarkers.length) currentStep = 0;
+    
     isAnimating = true;
+    document.body.classList.add('timeline-active'); // Arată sliderele
 
-    // Actualizare Butoane (Desktop + Mobil)
     document.querySelectorAll('.btn-play').forEach(btn => {
-        btn.innerHTML = '◼ Stop';
-        btn.style.background = '#e05555'; // Roșu pentru stop
-    });
-    document.querySelectorAll('.anim-date-txt').forEach(d => {
-        d.style.display = 'block';
-        d.textContent = 'Pregătire...';
+        btn.innerHTML = '⏸ Pauză';
+        btn.style.background = '#e07a30'; // Portocaliu
     });
 
-    // 1. Curățăm harta
-    Object.keys(CATS).forEach(k => layers[k]?.clearLayers());
-
-    // 2. Sortăm pinurile crescător după dată (cele vechi primele, cele noi la final)
-    const sortedMarkers = [...allMarkers].sort((a, b) => a.ts - b.ts);
-
-    let i = 0;
     animInterval = setInterval(() => {
-        if (i >= sortedMarkers.length) {
-            stopTimeline();
-            return;
+        currentStep++;
+        drawStep(currentStep);
+        
+        if (currentStep >= datedMarkers.length) {
+            pauseTimeline(); // Se oprește la sfârșit
         }
-
-        const item = sortedMarkers[i];
-        
-        // Adăugăm pinul doar dacă acea categorie este activată (bifată) de utilizator
-        if (visible[item.cat]) {
-            item.marker.addTo(layers[item.cat]);
-        }
-        
-        // Updatăm textul UI-ului de animație
-        const displayDate = fmtDate(item.pt.date) || "Începuturi";
-        document.querySelectorAll('.anim-date-txt').forEach(d => d.textContent = displayDate);
-        
-        i++;
-    }, 150); // 150 milisecunde între fiecare pin (ajustabil)
+    }, 150); // Viteza (150ms per pin)
 }
 
-function stopTimeline() {
+function pauseTimeline() {
     isAnimating = false;
     clearInterval(animInterval);
     
-    // Readucere butoane la starea normală
     document.querySelectorAll('.btn-play').forEach(btn => {
         btn.innerHTML = '▶ Play';
-        btn.style.background = '#3dba6f';
+        btn.style.background = '#3dba6f'; // Verde înapoi
     });
-    document.querySelectorAll('.anim-date-txt').forEach(d => d.textContent = 'Evoluție completă');
+}
 
-    // Asigurăm-ne că la final toate pinurile (ale căror categorii sunt active) sunt vizibile
-    allMarkers.forEach(item => {
-        if (visible[item.cat] && !layers[item.cat].hasLayer(item.marker)) {
-            item.marker.addTo(layers[item.cat]);
-        }
-    });
+// Când dai swipe manual pe bară
+function scrubTimeline(val) {
+    pauseTimeline();
+    document.body.classList.add('timeline-active'); 
+    currentStep = parseInt(val);
+    drawStep(currentStep);
 }
 
 // ── Boot ─────────────────────────────────────────
@@ -387,9 +435,8 @@ function init(imgW, imgH) {
     L.imageOverlay('harta.png', [[0,0],[H,W]]).addTo(map);
     map.setView([H/2, W/2], -1);
 
-    Object.keys(CATS).forEach(k => { layers[k] = L.layerGroup().addTo(map); counts[k] = 0; visible[k] = true; });
+    Object.keys(CATS).forEach(k => { layers[k] = L.layerGroup().addTo(map); visible[k] = true; });
 
-    // drum.png overlay
     drumOverlay = L.imageOverlay('drum.png', [[0,0],[H,W]], { opacity: 0.9 }).addTo(map);
 
     buildSidebar();

@@ -24,20 +24,21 @@ Cimpi,baza,1086,189
 
 ///
 
-Croitorie,structura,-903,71
-Banca Națională,structura,-943,43
-Primăria,structura,-915,11
+Croitorie,structura,-903,71,11022026
+Banca Națională,structura,-943,43,30012026
+Primăria,structura,-915,11,13022026
 
-Telescaun,structura,1124,75
+Casa Lui Cimpi,1120,196,09022026
+Telescaun,structura,1124,75,15062026
 
-Backrooms,structura,-630,910
-Casa Lui Beatrice,structura,-605,891
+Backrooms,structura,-630,910,30032026
+Casa Lui Beatrice,structura,-605,891,14042026
 Gospodăria Lui Beatrice,structura,-558,906
 Grajdul Lui Beatrice,structura,-573,872
 Depozitul Lui Beatrice,structura,-559,875
 Ferma Lui Beatrice,structura,-590,958
 
-Casa Lui IoanaIM,structura,-248,906
+Casa Lui IoanaIM,structura,-248,906,16012026
 Gospodăria Lui IoanaIM,structura,-236,974
 Herghelia Lui IoanaIM,structura,-390,939
 Ferma Lui IoanaIM,structura,-284,983
@@ -48,53 +49,52 @@ Foișorul De Pe Lac A Lui IoanaIM,structura,-322,923
 Grajdul Lui IoanaIM,structura,-256,879
 Casa Enchatmentului A Lui IoanaIM,structura,-301,846
 
-Casa Lui beelovesbees,structura,-53,608
+Casa Lui beelovesbees,structura,-53,608,25032026
 Sera Lui beelovesbees,structura,-41,671
 Gospodăria Lui beelovesbees,structura,39,616
 Foișorul Lui beelovesbees,structura,-26,585
 
-Uzina De Bambus,structura,-381,250
-Uzina De Trestie,structura,-381,262
-Uzina De Lavă,structura,-414,286
-Uzina De XP,structura,-398,333
-Uzina De Piatră,structura,-369,292
-Uzina De Fier,structura,-385,351
-Maridor,structura,-381,318
+Uzina De Bambus,structura,-381,250,13022026
+Uzina De Trestie,structura,-381,262,13022026  
+Uzina De Lavă,structura,-414,286,21012026
+Uzina De XP,structura,-398,333,06022026
+Uzina De Piatră,structura,-369,292,29022026
+Uzina De Fier,structura,-385,351,11012026
+Maridor,structura,-381,318,10012026
+Tunelul Industrial,-284,348,13012026
 
-Casa Lui Ma_ta69,structura,156,426
-Casa Lui true,structura,172,497
-Sera Lui true,structura,142,539
-Gospodăria Lui true,structura,144,564
+Casa Lui Ma_ta69,structura,156,426,03022026
+Casa Lui true,structura,172,497,11012026
+Sera Lui true,structura,142,539,03022026
+Gospodăria Lui true,structura,144,564,03022026
 Topitoria Lui true,173,538
 
-Han,structura,-69,421
-Biblioteca Națională,structura,-36,389
-Biserica,structura,16,441
-Restaurantul Japonez,structura,33,451
-Fierar,structura,46,466
-Poștă,structura,40,487
-Seră,structura,80,454
-Cimitir,structura,15,408
-Piață,structura,11,499
-Centru Comunitar,structura,20,530
+Han,structura,-69,421,27022026
+Biblioteca Națională,structura,-36,389,04022026
+Biserica,structura,16,441,29012026
+Restaurantul Japonez,structura,33,451,02022026
+Fierar,structura,46,466,01022026
+Poștă,structura,40,487,28052026
+Seră,structura,80,454,02032026
+Cimitir,structura,15,408,02042026
+Piață,structura,11,499,05022026
+Centru Comunitar,structura,20,530,15012026
 Cantina Socială,structura,116,530
-CezFour,structura,-98,385
+CezFour,structura,-98,385,23052026
 
 Turnir,structura,58,240
-Restaurantul Chinezesc,structura,-896,494
-
-
+Restaurantul Chinezesc,structura,-896,494,26022026
 
 ///
 
 Stația Nisipului,metro,-1003,937
-Stația Polară,metro,1102,67
-Stația Capitalei,metro,29,512
+Stația Polară,metro,1102,67,02042026
+Stația Capitalei,metro,29,512,16032026
 
 ///
 
-Portul Capitalei,port,50,555
-Portul Industrial,port,-441,392
+Portul Capitalei,port,50,555,07062026
+Portul Industrial,port,-441,392,22062026
 Portul Mesa,portx,-686,350
 Portul Vestadin,portx,-917,139
 Portul Pădure,portx,278,415
@@ -103,7 +103,8 @@ Portul Lui IoanaIM,port,-288,920
 
 ///
 
-Podul De Piatră,pod,-460,464
-Podul De Lemn,pod,-358,607
-Podul Roș,pod,-246,572
-Podul Dragonilor,pod,1022,183
+Podul De Piatră,pod,-460,464,12012026
+Podulețul Vecin,-752,544,19022026
+Podul De Lemn,pod,-358,607,12042026
+Podul Roș,pod,-246,572,09042026
+Podul Dragonilor,pod,1022,183,16042026

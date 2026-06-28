@@ -71,28 +71,27 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- 1. COORDONATELE EXTREME DIN MINECRAFT (Marginile Hărții) ---
-        const topLeftX = -1345;     // Cel mai vestic punct (Marginea din stânga)
-        const topLeftZ = -840;      // Cel mai nordic punct (Marginea de sus)
-        
-        const bottomRightX = 1500;  // Cel mai estic punct (Marginea din dreapta)
-        const bottomRightZ = 1250;  // Cel mai sudic punct (Marginea de jos)
+        // --- CALIBRARE MATEMATICĂ FINALĂ ---
+        const imgWidth = 1440;
+        const imgHeight = 1080;
+        const bounds = [[0, 0], [imgHeight, imgWidth]];
 
-        // --- 2. DIMENSIUNILE IMAGINII ---
-        const mapWidth = 1440;
-        const mapHeight = 1080;
-        const bounds = [[0, 0], [mapHeight, mapWidth]];
+        // Ancorăm centrul vizual al imaginii de centrul exact din joc
+        const centerImgX = imgWidth / 2;  // 720
+        const centerImgY = imgHeight / 2; // 540
+        const centerGameX = 70;
+        const centerGameZ = 226;
 
-        // --- 3. FUNCȚIA CARE CALCULEAZĂ POZIȚIA EXACTĂ LA PIXEL ---
+        // Calculăm câte blocuri intră într-un singur pixel (bazat pe extreme)
+        // Lățime totală blocuri: de la -1345 la 1500 = 2845 blocuri
+        // Înălțime totală blocuri: de la -840 la 1250 = 2090 blocuri
+        const scaleX = 2845 / imgWidth;  // ~ 1.975
+        const scaleZ = 2090 / imgHeight; // ~ 1.935
+
         function minecraftToLeaflet(x, z) {
-            // Aflăm la ce procent din lățimea/înălțimea hărții se află coordonata
-            const percentX = (x - topLeftX) / (bottomRightX - topLeftX);
-            const percentZ = (z - topLeftZ) / (bottomRightZ - topLeftZ);
-
-            // Transformăm procentele în coordonate pentru Leaflet (Lng, Lat)
-            const lng = percentX * mapWidth;
-            const lat = mapHeight - (percentZ * mapHeight);
-
+            // Calculăm poziția exactă față de centrul ancorat
+            const lng = centerImgX + (x - centerGameX) / scaleX;
+            const lat = centerImgY - (z - centerGameZ) / scaleZ;
             return [lat, lng];
         }
 
@@ -102,12 +101,10 @@
             maxBounds: bounds, maxBoundsViscosity: 1.0
         });
 
-        // Anti-cache pentru imagine: adăugăm un timestamp generat automat
-        const imageUrl = 'harta.jpg?v=' + new Date().getTime();
-        L.imageOverlay(imageUrl, bounds).addTo(map);
-        
-        // Centrarea hărții la încărcare
-        map.setView([mapHeight / 2, mapWidth / 2], 0);
+        // Adăugăm un parametru de versiune pentru a sparge cache-ul și a forța actualizarea imaginii
+        const currentVersion = new Date().getTime();
+        L.imageOverlay('image_d8de1d.jpg?v=' + currentVersion, bounds).addTo(map);
+        map.setView([centerImgY, centerImgX], 0);
 
         const layers = {
             orase: L.layerGroup().addTo(map),
@@ -191,10 +188,8 @@
         // --- AUTO-SYNC LOGIC ---
         async function fetchLocalCSV() {
             try {
-                // Anti-cache pentru CSV: adăugăm un timestamp generat automat
-                const csvUrl = './nartia_date.csv?v=' + new Date().getTime();
-                const response = await fetch(csvUrl, { cache: "no-store" });
-                
+                // Adăugăm timestamp pentru a forța browserul să nu citească din cache
+                const response = await fetch('./nartia_date.csv?t=' + new Date().getTime(), { cache: "no-store" });
                 if (!response.ok) throw new Error("Fișierul nu a fost găsit.");
 
                 const text = await response.text();

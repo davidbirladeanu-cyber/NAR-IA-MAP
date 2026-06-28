@@ -1,36 +1,35 @@
 name,category,x,z
 
-Capitala,orase,0,500
-Vestadin,orase,-915,50
-Zona Industrială,orase,-384,293
-Ruine,orase,1100,190
+Capitala,orase,20,450
+Vestadin,orase,-915,56
+Zona Industrială,orase,-396,291
+Ruine,orase,1097,183
 
-Vecini,sate,-800,550
-Sat Desert,sate,-990,950
-Sat Savana,sate,-184,165
-Sat Câmpie,sate,83,263
-Sat Munte,sate,-160,-160
+Vecinii,sate,-807,551
+Sat Desert,sate,-970,950
+Sat Savana,sate,-189,140
+Sat Câmpie,sate,92,268
+Sat Munte,sate,-171,-171
 
-Beatrice,baze,-600,890
-IoanaIM,baze,-322,923
-beelovesbees,baze,-41,625
-Ma_ta69,baze,150,430
-true,baze,170,500
-Cimpi,baze,1090,190
-Flame8043,bazex,-600,890
-xXQualityTrashXx,bazex,-383,325
-DavidThedy,bazex,-383,325
+Beatrice,baze,-605,892
+IoanaIM,baze,-248,906
+beelovesbees,baze,-53,608
+Ma_ta69,baze,155,426
+true,baze,172,497
+Cimpi,baze,1093,187
+xXQualityTrashXx,bazex,-381,318
+DavidThedy,bazex,-381,318
 
-Restaurant Chinezesc,structuri,-890,493
-Turnir,structuri,58,240
-CezFour,structuri,-98,385
+Restaurant Chinezesc,structurix,-890,493
+Turnir,structurix,58,240
+CezFour,structurix,-98,385
 
-Metro Desert,metro,-1000,940
-Metro Polar,metro,1100,67
-Metro Capitala,metro,30,512
+Metro Desert,metro,-1003,937
+Metro Polar,metro,1102,67
+Metro Capitala,metro,29,512
 
-Port Capitala,port,50,550
-Port Industrial,portx,-439,381
+Port Capitala,port,50,555
+Port Industrial,port,-441,392
 Port Mesa,portx,-686,350
 Port Vestadin,portx,-917,139
 Port Pădure,portx,278,415

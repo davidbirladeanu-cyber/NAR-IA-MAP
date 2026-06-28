@@ -1,11 +1,10 @@
-name,category,x,z
+name,category,x,z,data,image
 
 ///
 
 Capitala,oras,20,450
 Vestadin,oras,-915,56
 Zona Industrială,oras,-396,291
-Ruine,oras,1097,183
 
 ///
 
@@ -19,9 +18,8 @@ Satul Munteni,sat,-171,-171
 
 Beatrice,baza,-580,891
 IoanaIM,baza,-322,923
-beelovesbees,baza,-53,608
-Ma_ta69,baza,155,426
-true,baza,172,497
+beelovesbees,baza,-25,623
+true,baza,154,495
 Cimpi,baza,1086,189
 
 ///
@@ -33,7 +31,7 @@ Primăria,structura,-915,11
 Telescaun,structura,1124,75
 
 Backrooms,structura,-630,910
-Casa Lui Beatrice,structura,605,891
+Casa Lui Beatrice,structura,-605,891
 Gospodăria Lui Beatrice,structura,-558,906
 Grajdul Lui Beatrice,structura,-573,872
 Depozitul Lui Beatrice,structura,-559,875

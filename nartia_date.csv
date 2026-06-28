@@ -5,11 +5,11 @@ Vestadin,oras,-915,56
 Zona Industrială,oras,-396,291
 Ruine,oras,1097,183
 
-Vecinii,sat,-807,551
-Sat Deșert,sat,-970,950
-Sat Savană,sat,-189,140
-Sat Câmpie,sat,92,268
-Sat Munte,sat,-171,-171
+Satul Vecinii,sat,-807,551
+Satul Deșerteni,sat,-970,950
+Satul Săvăneni,sat,-189,140
+Satul Câmpeni,sat,92,268
+Satul Munteni,sat,-171,-171
 
 Beatrice,baza,-605,892
 IoanaIM,baza,-248,906
@@ -24,13 +24,17 @@ Restaurant Chinezesc,structura,-896,494
 Turnir,structura,58,240
 CezFour,structura,-98,385
 
-Metro Desert,metro,-1003,937
-Metro Polar,metro,1102,67
-Metro Capitala,metro,29,512
+Stația Nisipului,metro,-1003,937
+Stația Polară,metro,1102,67
+Stația Capitalei,metro,29,512
 
-Port Capitala,port,50,555
-Port Industrial,port,-441,392
-Port Mesa,portx,-686,350
-Port Vestadin,portx,-917,139
-Port Pădure,portx,278,415
-Port Deșert,portx,-911,975
+Portul Capitalei,port,50,555
+Portul Industrial,port,-441,392
+Portul Mesa,portx,-686,350
+Portul Vestadin,portx,-917,139
+Portul Pădure,portx,278,415
+Portul Deșert,portx,-911,975
+
+Podul De Piatră,pod,-460,464
+Podul De Lemn,pod,-358,607
+Podul Roș,pod,-246,572

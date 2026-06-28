@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Narția — Hartă</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -18,24 +18,32 @@
         }
 
         html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+        /* ── DESKTOP layout ── */
         #app { display: flex; width: 100vw; height: 100vh; }
 
-        /* Sidebar */
-        #sidebar { width: 260px; min-width: 260px; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; z-index: 1000; }
+        #sidebar {
+            width: 260px; min-width: 260px;
+            background: var(--panel);
+            border-right: 1px solid var(--line);
+            display: flex; flex-direction: column;
+            z-index: 1000;
+        }
+
         .s-head { padding: 22px 20px 18px; border-bottom: 1px solid var(--line); }
         .s-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
         .s-sub { margin-top: 3px; font-size: 11px; color: var(--muted); }
         .s-section { padding: 16px 20px 8px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
         .s-list { flex: 1; overflow-y: auto; padding: 0 12px 12px; scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+
         .cat-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.1s; user-select: none; }
         .cat-row:hover { background: var(--line); }
         .cat-row.off { opacity: 0.35; }
         .cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .cat-dot-road { width: 14px; height: 3px; border-radius: 2px; flex-shrink: 0; }
         .cat-name { flex: 1; font-size: 13px; color: var(--text); }
         .cat-count { font-size: 11px; color: var(--muted); min-width: 16px; text-align: right; }
-
-        /* drum row — dot e o linie orizontală */
-        .cat-dot-road { width: 14px; height: 3px; border-radius: 2px; flex-shrink: 0; }
 
         .s-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
         .pulse { width: 6px; height: 6px; border-radius: 50%; background: #3dba6f; animation: pulse 2.4s ease infinite; }
@@ -43,7 +51,101 @@
 
         #map { flex: 1; height: 100%; background: var(--bg); }
 
-        /* Leaflet popup */
+        /* mobile-only elements hidden on desktop */
+        #mob-topbar, #mob-fab, #drawer-backdrop, #drawer { display: none; }
+
+        /* ── MOBILE layout ── */
+        @media (max-width: 640px) {
+            #sidebar { display: none; }
+
+            /* Top bar */
+            #mob-topbar {
+                display: flex;
+                position: fixed; top: 0; left: 0; right: 0;
+                height: 52px;
+                background: var(--panel);
+                border-bottom: 1px solid var(--line);
+                align-items: center;
+                padding: 0 16px;
+                z-index: 2000;
+            }
+            .mob-title { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; flex: 1; }
+            .mob-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+
+            /* Map fills screen minus topbar */
+            #app { flex-direction: column; }
+            #map { width: 100%; height: 100%; padding-top: 52px; }
+
+            /* FAB filtru */
+            #mob-fab {
+                display: flex;
+                position: fixed;
+                bottom: 24px; right: 16px;
+                width: 52px; height: 52px;
+                background: var(--panel);
+                border: 1px solid var(--line2);
+                border-radius: 50%;
+                align-items: center; justify-content: center;
+                cursor: pointer;
+                z-index: 2000;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            }
+            #mob-fab svg { width: 22px; height: 22px; }
+
+            /* Backdrop */
+            #drawer-backdrop {
+                display: block;
+                position: fixed; inset: 0;
+                background: rgba(0,0,0,0.55);
+                z-index: 2500;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.25s;
+            }
+            #drawer-backdrop.open { opacity: 1; pointer-events: all; }
+
+            /* Bottom drawer */
+            #drawer {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                background: var(--panel);
+                border-top: 1px solid var(--line2);
+                border-radius: 16px 16px 0 0;
+                z-index: 3000;
+                max-height: 70vh;
+                transform: translateY(100%);
+                transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+            }
+            #drawer.open { transform: translateY(0); }
+
+            .drawer-handle {
+                width: 36px; height: 4px;
+                background: var(--line2);
+                border-radius: 2px;
+                margin: 12px auto 0;
+                flex-shrink: 0;
+            }
+            .drawer-title {
+                padding: 14px 20px 6px;
+                font-size: 10px; font-weight: 600;
+                letter-spacing: 0.08em; text-transform: uppercase;
+                color: var(--muted);
+                flex-shrink: 0;
+            }
+            .drawer-list {
+                overflow-y: auto;
+                padding: 0 12px 28px;
+                flex: 1;
+            }
+            /* bigger touch targets on mobile */
+            .drawer-list .cat-row { padding: 12px 10px; }
+            .drawer-list .cat-name { font-size: 15px; }
+            .drawer-list .cat-count { font-size: 12px; }
+        }
+
+        /* ── Leaflet popup ── */
         .leaflet-popup-content-wrapper {
             background: var(--panel) !important;
             border: 1px solid var(--line2) !important;
@@ -53,31 +155,29 @@
             overflow: hidden !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
             min-width: 220px;
-            max-width: 260px;
+            max-width: 280px;
         }
         .leaflet-popup-content { margin: 0 !important; width: 100% !important; }
         .leaflet-popup-tip-container { display: none; }
-        .leaflet-popup-close-button { color: var(--muted) !important; font-size: 16px !important; right: 8px !important; top: 8px !important; z-index: 10; }
+        .leaflet-popup-close-button { color: var(--muted) !important; font-size: 18px !important; right: 10px !important; top: 8px !important; z-index: 10; width: 32px !important; height: 32px !important; }
         .leaflet-popup-close-button:hover { color: var(--text) !important; }
 
-        /* Popup card */
+        /* ── Popup card ── */
         .pc { display: flex; flex-direction: column; }
         .pc-accent { height: 3px; width: 100%; }
 
-        /* Slideshow */
-        .pc-slideshow { position: relative; width: 100%; height: 130px; background: var(--bg); overflow: hidden; }
+        .pc-slideshow { position: relative; width: 100%; height: 140px; background: var(--bg); overflow: hidden; }
         .pc-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; }
         .pc-slide.active { opacity: 1; }
         .pc-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .pc-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: linear-gradient(transparent, rgba(0,0,0,0.55)); }
-        .pc-nav-btn { background: rgba(255,255,255,0.12); border: none; color: #fff; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .pc-nav-btn:hover { background: rgba(255,255,255,0.22); }
-        .pc-dots { display: flex; gap: 4px; }
-        .pc-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.15s; }
+        .pc-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); }
+        .pc-nav-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .pc-nav-btn:active { background: rgba(255,255,255,0.3); }
+        .pc-dots { display: flex; gap: 5px; align-items: center; }
+        .pc-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.15s; }
         .pc-dot.active { background: #fff; }
 
-        /* single image (non-drum) */
-        .pc-img { width: 100%; height: 120px; object-fit: cover; display: block; background: var(--bg); }
+        .pc-img { width: 100%; height: 130px; object-fit: cover; display: block; background: var(--bg); }
         .pc-img-ph { width: 100%; height: 72px; background: var(--bg); display: flex; align-items: center; justify-content: center; }
 
         .pc-body { padding: 14px 16px 16px; }
@@ -93,16 +193,43 @@
 </head>
 <body>
 <div id="app">
+    <!-- Desktop sidebar -->
     <div id="sidebar">
         <div class="s-head">
             <div class="s-title">Narția</div>
             <div class="s-sub">Hartă interactivă</div>
         </div>
         <div class="s-section">Categorii</div>
-        <div class="s-list" id="cat-list"></div>
+        <div class="s-list" id="cat-list-desk"></div>
         <div class="s-foot"><div class="pulse"></div><span>Sincronizat live</span></div>
     </div>
+
     <div id="map"></div>
+</div>
+
+<!-- Mobile top bar -->
+<div id="mob-topbar">
+    <span class="mob-title">Narția</span>
+    <span class="mob-live"><div class="pulse"></div>Live</span>
+</div>
+
+<!-- Mobile FAB -->
+<div id="mob-fab" onclick="toggleDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#e2e2e4" stroke-width="1.8" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+</div>
+
+<!-- Mobile backdrop -->
+<div id="drawer-backdrop" onclick="toggleDrawer()"></div>
+
+<!-- Mobile bottom drawer -->
+<div id="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">Categorii</div>
+    <div class="drawer-list" id="cat-list-mob"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -122,6 +249,14 @@ const CATS = {
 
 let map, W, H;
 let layers = {}, roadOverlays = {}, counts = {}, visible = {}, lastCSV = '';
+let drawerOpen = false;
+
+// ── Drawer ───────────────────────────────────────
+window.toggleDrawer = function() {
+    drawerOpen = !drawerOpen;
+    document.getElementById('drawer').classList.toggle('open', drawerOpen);
+    document.getElementById('drawer-backdrop').classList.toggle('open', drawerOpen);
+};
 
 // ── Pin ──────────────────────────────────────────
 function pin(color) {
@@ -167,22 +302,22 @@ function popupNormal(p) {
 }
 
 // ── Popup drum cu slideshow ───────────────────────
-let slideshowState = {}; // keyed by popup id
+let slideshowState = {};
 
 function popupDrum(p) {
     const col = CATS.drum.color;
     const imgs = p.imgs.filter(i => i.trim());
     const id = 'ss_' + Math.random().toString(36).slice(2);
 
-    let slidesHtml = imgs.map((src, i) =>
+    const slidesHtml = imgs.map((src, i) =>
         `<div class="pc-slide${i===0?' active':''}" data-idx="${i}"><img src="${src.trim()}" alt="${p.name}" loading="lazy"></div>`
     ).join('');
 
-    let dotsHtml = imgs.length > 1
+    const dotsHtml = imgs.length > 1
         ? imgs.map((_,i) => `<div class="pc-dot${i===0?' active':''}" onclick="ssGoto('${id}',${i})"></div>`).join('')
         : '';
 
-    let navHtml = imgs.length > 1
+    const navHtml = imgs.length > 1
         ? `<div class="pc-nav">
             <button class="pc-nav-btn" onclick="ssPrev('${id}')">&#8249;</button>
             <div class="pc-dots">${dotsHtml}</div>
@@ -208,61 +343,68 @@ function popupDrum(p) {
     </div>`;
 }
 
-// Slideshow helpers (global so onclick inline funcționează)
 window.ssGoto = function(id, idx) {
-    const el = document.getElementById(id);
-    if (!el) return;
+    const el = document.getElementById(id); if (!el) return;
+    el.querySelectorAll('.pc-slide').forEach(s => s.classList.remove('active'));
+    el.querySelectorAll('.pc-dot').forEach(d => d.classList.remove('active'));
     const slides = el.querySelectorAll('.pc-slide');
     const dots = el.querySelectorAll('.pc-dot');
-    slides.forEach(s => s.classList.remove('active'));
-    dots.forEach(d => d.classList.remove('active'));
     if (slides[idx]) slides[idx].classList.add('active');
     if (dots[idx]) dots[idx].classList.add('active');
     slideshowState[id].idx = idx;
 };
-window.ssNext = function(id) {
-    const st = slideshowState[id]; if (!st) return;
-    ssGoto(id, (st.idx + 1) % st.total);
-};
-window.ssPrev = function(id) {
-    const st = slideshowState[id]; if (!st) return;
-    ssGoto(id, (st.idx - 1 + st.total) % st.total);
-};
+window.ssNext = function(id) { const st=slideshowState[id]; if(st) ssGoto(id,(st.idx+1)%st.total); };
+window.ssPrev = function(id) { const st=slideshowState[id]; if(st) ssGoto(id,(st.idx-1+st.total)%st.total); };
 
-// ── Sidebar ───────────────────────────────────────
+// ── Sidebar + Drawer rows (shared) ───────────────
+function makeRow(k, isMobile) {
+    const cat = CATS[k];
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.id = (isMobile ? 'mob-' : 'desk-') + 'row-' + k;
+    const dotHtml = cat.isDrum
+        ? `<div class="cat-dot-road" style="background:${cat.color}"></div>`
+        : `<div class="cat-dot" style="background:${cat.color}"></div>`;
+    row.innerHTML = `${dotHtml}<span class="cat-name">${cat.label}</span><span class="cat-count" id="${isMobile?'mob-':'desk-'}cnt-${k}">0</span>`;
+    row.addEventListener('click', () => {
+        toggle(k);
+        if (isMobile) toggleDrawer();
+    });
+    return row;
+}
+
 function buildSidebar() {
-    const list = document.getElementById('cat-list');
-    list.innerHTML = '';
+    const desk = document.getElementById('cat-list-desk');
+    const mob  = document.getElementById('cat-list-mob');
+    desk.innerHTML = ''; mob.innerHTML = '';
     Object.keys(CATS).forEach(k => {
-        const cat = CATS[k];
-        const row = document.createElement('div');
-        row.className = 'cat-row';
-        row.id = 'row-' + k;
-        const dotHtml = cat.isDrum
-            ? `<div class="cat-dot-road" style="background:${cat.color}"></div>`
-            : `<div class="cat-dot" style="background:${cat.color}"></div>`;
-        row.innerHTML = `${dotHtml}<span class="cat-name">${cat.label}</span><span class="cat-count" id="cnt-${k}">0</span>`;
-        row.addEventListener('click', () => toggle(k));
-        list.appendChild(row);
+        desk.appendChild(makeRow(k, false));
+        mob.appendChild(makeRow(k, true));
     });
 }
 
 function toggle(k) {
     visible[k] = !visible[k];
-    const row = document.getElementById('row-' + k);
+    ['desk-row-','mob-row-'].forEach(prefix => {
+        document.getElementById(prefix + k)?.classList.toggle('off', !visible[k]);
+    });
     if (visible[k]) {
-        if (CATS[k].isDrum) {
-            Object.values(roadOverlays[k] || {}).forEach(ov => ov.addTo(map));
-        }
-        if (layers[k]) layers[k].addTo(map);
-        row.classList.remove('off');
+        if (CATS[k].isDrum) Object.values(roadOverlays[k]||{}).forEach(ov => ov.addTo(map));
+        layers[k]?.addTo(map);
     } else {
-        if (CATS[k].isDrum) {
-            Object.values(roadOverlays[k] || {}).forEach(ov => map.removeLayer(ov));
-        }
-        if (layers[k]) map.removeLayer(layers[k]);
-        row.classList.add('off');
+        if (CATS[k].isDrum) Object.values(roadOverlays[k]||{}).forEach(ov => map.removeLayer(ov));
+        layers[k] && map.removeLayer(layers[k]);
     }
+}
+
+function updateCounts() {
+    Object.keys(CATS).forEach(k => {
+        const v = counts[k] || 0;
+        const de = document.getElementById('desk-cnt-' + k);
+        const me = document.getElementById('mob-cnt-' + k);
+        if (de) de.textContent = v;
+        if (me) me.textContent = v;
+    });
 }
 
 // ── Coords ───────────────────────────────────────
@@ -279,15 +421,10 @@ async function fetchCSV() {
         if (text === lastCSV) return;
         lastCSV = text;
 
-        // Clear all
         Object.keys(CATS).forEach(k => {
-            layers[k] && layers[k].clearLayers();
+            layers[k]?.clearLayers();
             counts[k] = 0;
-            // Clear road overlays
-            if (roadOverlays[k]) {
-                Object.values(roadOverlays[k]).forEach(ov => map.removeLayer(ov));
-                roadOverlays[k] = {};
-            }
+            if (roadOverlays[k]) { Object.values(roadOverlays[k]).forEach(ov => map.removeLayer(ov)); roadOverlays[k] = {}; }
         });
 
         text.split('\n').slice(1).forEach(line => {
@@ -295,56 +432,34 @@ async function fetchCSV() {
             if (!line || line.startsWith('///')) return;
             const p = line.split(',').map(s => s.trim());
             if (p.length < 2) return;
-
-            const name = p[0];
-            const cat  = p[1];
+            const name = p[0], cat = p[1];
             if (!CATS[cat]) return;
 
             if (cat === 'drum') {
-                // format: Numele,drum,img1.jpg,img2.jpg,...
                 const imgs = p.slice(2).filter(Boolean);
                 if (!imgs.length) return;
-
-                // Folosim prima imagine ca overlay pe hartă
-                const overlayImg = imgs[0];
-
-                // Adaugă imaginea ca overlay care acoperă toată harta
-                // (fișierul e o imagine care se suprapune perfect peste harta PNG)
                 if (!roadOverlays[cat]) roadOverlays[cat] = {};
-
-                const ov = L.imageOverlay(overlayImg, [[0,0],[H,W]], { opacity: 0.85 });
+                const ov = L.imageOverlay(imgs[0], [[0,0],[H,W]], { opacity: 0.85 });
                 if (visible[cat]) ov.addTo(map);
                 roadOverlays[cat][name] = ov;
-
-                // Marker în centrul hărții ca punct de acces la popup
-                // (poți muta X,Z dacă vrei un loc specific — momentan nu e în CSV)
-                // Adăugăm un marker invizibil/mic în centru
-                const markerLatLng = [H/2, W/2]; // fallback — nu avem coord pentru drum
                 const pt = { name, cat, imgs };
-                const mk = L.marker(markerLatLng, {
-                    icon: pin(CATS.drum.color),
-                    opacity: 0
-                }).bindPopup(popupDrum(pt), { maxWidth: 260 });
-                mk.addTo(layers[cat]);
-
-                counts[cat] = (counts[cat] || 0) + 1;
+                L.marker([H/2, W/2], { icon: pin(CATS.drum.color), opacity: 0 })
+                    .bindPopup(popupDrum(pt), { maxWidth: 280 })
+                    .addTo(layers[cat]);
+                counts[cat] = (counts[cat]||0) + 1;
             } else {
-                // format normal: Nume,cat,x,z,data,img
                 if (p.length < 4) return;
                 const x = +p[2], z = +p[3];
                 if (isNaN(x) || isNaN(z)) return;
                 const pt = { name, cat, x, z, date: p[4]||'', imgs: p[5] ? [p[5]] : [] };
                 L.marker(mc2ll(x, z), { icon: pin(CATS[cat]?.color || '#888') })
-                    .bindPopup(popupNormal(pt), { maxWidth: 260 })
+                    .bindPopup(popupNormal(pt), { maxWidth: 280 })
                     .addTo(layers[cat]);
-                counts[cat] = (counts[cat] || 0) + 1;
+                counts[cat] = (counts[cat]||0) + 1;
             }
         });
 
-        Object.keys(CATS).forEach(k => {
-            const el = document.getElementById('cnt-' + k);
-            if (el) el.textContent = counts[k] || 0;
-        });
+        updateCounts();
     } catch(e) { console.warn(e); }
 }
 
@@ -353,7 +468,8 @@ function init(imgW, imgH) {
     W = imgW; H = imgH;
     map = L.map('map', {
         crs: L.CRS.Simple, minZoom:-2, maxZoom:3,
-        maxBounds:[[0,0],[H,W]], maxBoundsViscosity:0.9
+        maxBounds:[[0,0],[H,W]], maxBoundsViscosity:0.9,
+        tap: true
     });
     L.imageOverlay('harta.png', [[0,0],[H,W]]).addTo(map);
     map.setView([H/2, W/2], -1);

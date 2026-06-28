@@ -71,15 +71,15 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- MATRICE GEOMETRICĂ AJUSTATĂ ---
-        const imgWidth = 2048; const imgHeight = 1536;
+        // --- MATRICE GEOMETRICĂ AJUSTATĂ (1440x1080) ---
+        const imgWidth = 1440; const imgHeight = 1080;
         const bounds = [[0, 0], [imgHeight, imgWidth]];
 
-        const centerImgX = 1024; const centerImgY = 768;
+        const centerImgX = 720; const centerImgY = 540;
         
-        // Coordonate recalibrate pe baza ancorelor trimise
-        const scaleX = 1.39476664;
-        const scaleZ = 1.42079143;
+        // Coordonate recalibrate (raport adaptat de la 2048x1536 la 1440x1080 pentru acuratețe vizuală 1:1)
+        const scaleX = 1.9836681; // Fostul 1.39476664 ajustat
+        const scaleZ = 2.0206811; // Fostul 1.42079143 ajustat
         const centerGameX = 59.3321312;
         const centerGameZ = 218.764228;
 
@@ -95,6 +95,7 @@
             maxBounds: bounds, maxBoundsViscosity: 1.0
         });
 
+        // Nu uita să te asiguri că fișierul 'image_d8de1d.jpg' a fost actualizat fizic la 1440x1080
         L.imageOverlay('image_d8de1d.jpg', bounds).addTo(map);
         map.setView([centerImgY, centerImgX], 0);
 

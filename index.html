@@ -78,10 +78,10 @@
         const centerImgX = 720; const centerImgY = 540;
         
         // Coordonate recalibrate (raport adaptat de la 2048x1536 la 1440x1080 pentru acuratețe vizuală 1:1)
-        const scaleX = 1.9836681; // Fostul 1.39476664 ajustat
-        const scaleZ = 2.0206811; // Fostul 1.42079143 ajustat
-        const centerGameX = 59.3321312;
-        const centerGameZ = 218.764228;
+        const scaleX = 2.01857;
+        const scaleZ = 1.94483;
+        const centerGameX = 82.091;
+        const centerGameZ = 185.994;
 
         function minecraftToLeaflet(x, z) {
             const lng = centerImgX + (x - centerGameX) / scaleX;

@@ -4,396 +4,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Narția — Hartă</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root {
-            --bg-void:     #07080d;
-            --bg-sidebar:  #0d0f18;
-            --bg-card:     #12151f;
-            --border:      #1e2235;
-            --border-glow: #2a3050;
-            --gold:        #c8a96e;
-            --gold-dim:    #7d6540;
-            --gold-bright: #e8c97e;
-            --text:        #cfc4a8;
-            --text-dim:    #7a7060;
-            --text-bright: #ede3cc;
-            --ruby:        #9b2335;
-        }
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body, html {
-            height: 100%; width: 100%;
-            font-family: 'IM Fell English', 'Georgia', serif;
-            background: var(--bg-void);
-            color: var(--text);
-            overflow: hidden;
+        :root {
+            --bg:       #0e0e10;
+            --panel:    #141416;
+            --line:     #222226;
+            --line2:    #2a2a2f;
+            --text:     #e2e2e4;
+            --muted:    #5a5a62;
+            --dim:      #3a3a42;
         }
+
+        html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 
         #app { display: flex; width: 100vw; height: 100vh; }
 
-        /* ──────────── SIDEBAR ──────────── */
+        /* ── Sidebar ── */
         #sidebar {
-            width: 290px;
-            min-width: 290px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
+            width: 260px;
+            min-width: 260px;
+            background: var(--panel);
+            border-right: 1px solid var(--line);
             display: flex;
             flex-direction: column;
             z-index: 1000;
-            position: relative;
-            overflow: hidden;
         }
 
-        /* Subtle corner ornament */
-        #sidebar::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
+        .s-head {
+            padding: 22px 20px 18px;
+            border-bottom: 1px solid var(--line);
         }
-
-        /* ──── Logo / Header ──── */
-        .sidebar-header {
-            padding: 28px 20px 22px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            position: relative;
-        }
-
-        .header-eyebrow {
-            font-family: 'Cinzel', serif;
-            font-size: 0.6rem;
-            letter-spacing: 4px;
-            color: var(--gold-dim);
+        .s-title {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .s-sub {
+            margin-top: 3px;
+            font-size: 11px;
+            color: var(--muted);
         }
 
-        .header-title {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--gold);
-            letter-spacing: 2px;
-            text-shadow: 0 0 20px rgba(200,169,110,0.3);
-            line-height: 1;
-        }
-
-        .header-sub {
-            margin-top: 8px;
-            font-style: italic;
-            font-size: 0.72rem;
-            color: var(--text-dim);
-        }
-
-        /* Ornament divider */
-        .ornament {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 20px;
-            margin: 14px 0;
-        }
-        .ornament-line {
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border-glow));
-        }
-        .ornament-line.right {
-            background: linear-gradient(90deg, var(--border-glow), transparent);
-        }
-        .ornament-diamond {
-            width: 6px; height: 6px;
-            background: var(--gold-dim);
-            transform: rotate(45deg);
-            flex-shrink: 0;
-        }
-
-        /* ──── Category section ──── */
-        .section-label {
-            padding: 0 20px 10px;
-            font-family: 'Cinzel', serif;
-            font-size: 0.58rem;
-            letter-spacing: 3px;
-            color: var(--gold-dim);
+        .s-section {
+            padding: 16px 20px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
+            color: var(--muted);
         }
 
-        .categories-list {
+        .s-list {
             flex: 1;
             overflow-y: auto;
-            padding: 0 16px 20px;
+            padding: 0 12px 12px;
             scrollbar-width: thin;
-            scrollbar-color: var(--gold-dim) transparent;
+            scrollbar-color: var(--line2) transparent;
         }
-        .categories-list::-webkit-scrollbar { width: 4px; }
-        .categories-list::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
 
-        .cat-item {
+        .cat-row {
             display: flex;
             align-items: center;
-            padding: 9px 12px;
-            margin-bottom: 5px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 3px;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
-            position: relative;
-            overflow: hidden;
+            transition: background 0.1s;
+            user-select: none;
         }
-        .cat-item::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 3px;
-        }
-        .cat-item:hover {
-            border-color: var(--border-glow);
-            background: #161928;
-        }
-
-        .cat-checkbox {
-            appearance: none;
-            width: 14px; height: 14px;
-            border: 1px solid var(--gold-dim);
-            border-radius: 2px;
-            margin-right: 10px;
-            flex-shrink: 0;
-            cursor: pointer;
-            position: relative;
-            background: transparent;
-            transition: background 0.15s, border-color 0.15s;
-        }
-        .cat-checkbox:checked {
-            background: var(--gold-dim);
-            border-color: var(--gold);
-        }
-        .cat-checkbox:checked::after {
-            content: '✓';
-            position: absolute;
-            top: -2px; left: 1px;
-            font-size: 11px;
-            color: var(--bg-void);
-            font-weight: bold;
-        }
+        .cat-row:hover { background: var(--line); }
+        .cat-row.off { opacity: 0.35; }
 
         .cat-dot {
-            width: 8px; height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            margin-right: 10px;
             flex-shrink: 0;
-            box-shadow: 0 0 6px currentColor;
         }
 
         .cat-name {
-            font-family: 'Cinzel', serif;
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
             flex: 1;
+            font-size: 13px;
+            color: var(--text);
         }
 
         .cat-count {
-            font-family: 'Cinzel', serif;
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            background: var(--bg-void);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1px 7px;
-            min-width: 24px;
-            text-align: center;
+            font-size: 11px;
+            color: var(--muted);
+            min-width: 16px;
+            text-align: right;
         }
 
-        /* ──── Footer ──── */
-        .sidebar-footer {
+        /* ── Footer ── */
+        .s-foot {
             padding: 14px 20px;
-            border-top: 1px solid var(--border);
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            font-style: italic;
-            text-align: center;
-        }
-        .footer-status {
-            display: inline-flex;
+            border-top: 1px solid var(--line);
+            display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
+            font-size: 11px;
+            color: var(--muted);
         }
-        .status-dot {
+        .pulse {
             width: 6px; height: 6px;
             border-radius: 50%;
-            background: #4caf50;
-            animation: pulse-dot 2s infinite;
+            background: #3dba6f;
+            animation: pulse 2.4s ease infinite;
         }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
-        /* ──────────── MAP ──────────── */
-        #map {
-            flex: 1;
-            height: 100%;
-            background: var(--bg-void);
-        }
+        /* ── Map ── */
+        #map { flex: 1; height: 100%; background: var(--bg); }
 
-        /* ──────────── LEAFLET OVERRIDES ──────────── */
+        /* ── Leaflet popup override ── */
         .leaflet-popup-content-wrapper {
-            background: #0c0e18 !important;
-            border: 1px solid var(--border-glow) !important;
-            border-radius: 4px !important;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(200,169,110,0.08) !important;
+            background: var(--panel) !important;
+            border: 1px solid var(--line2) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.7) !important;
             padding: 0 !important;
             overflow: hidden !important;
-            font-family: 'IM Fell English', Georgia, serif !important;
-            min-width: 220px;
-            max-width: 270px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+            min-width: 210px;
+            max-width: 250px;
         }
-        .leaflet-popup-content {
-            margin: 0 !important;
-            width: 100% !important;
-        }
+        .leaflet-popup-content { margin: 0 !important; width: 100% !important; }
         .leaflet-popup-tip-container { display: none; }
         .leaflet-popup-close-button {
-            color: var(--gold-dim) !important;
-            font-size: 18px !important;
+            color: var(--muted) !important;
+            font-size: 16px !important;
             right: 8px !important;
-            top: 6px !important;
+            top: 8px !important;
             z-index: 10;
         }
-        .leaflet-popup-close-button:hover { color: var(--gold) !important; }
+        .leaflet-popup-close-button:hover { color: var(--text) !important; }
 
-        /* ──────────── POPUP CARD ──────────── */
-        .popup-card {
-            display: flex;
-            flex-direction: column;
-        }
+        /* ── Popup card ── */
+        .pc { display: flex; flex-direction: column; }
 
-        .popup-banner {
-            height: 4px;
+        .pc-accent { height: 3px; width: 100%; }
+
+        .pc-img {
             width: 100%;
-        }
-
-        .popup-thumb {
-            width: 100%;
-            height: 130px;
+            height: 120px;
             object-fit: cover;
             display: block;
-            border-bottom: 1px solid var(--border);
-            background: #0a0c14;
+            background: var(--bg);
         }
-
-        .popup-thumb-placeholder {
+        .pc-img-ph {
             width: 100%;
-            height: 70px;
-            background: linear-gradient(135deg, #0d0f1a 0%, #1a1d2e 100%);
+            height: 72px;
+            background: var(--bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid var(--border);
-        }
-        .popup-thumb-placeholder svg { opacity: 0.15; }
-
-        .popup-body {
-            padding: 14px 16px 16px;
         }
 
-        .popup-type-badge {
+        .pc-body { padding: 14px 16px 16px; }
+
+        .pc-badge {
             display: inline-block;
-            font-family: 'Cinzel', serif;
-            font-size: 0.55rem;
-            letter-spacing: 2px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 2px;
-            border: 1px solid currentColor;
+            padding: 2px 7px;
+            border-radius: 4px;
             margin-bottom: 8px;
-            opacity: 0.85;
         }
 
-        .popup-name {
-            font-family: 'Cinzel', serif;
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-bright);
-            line-height: 1.2;
-            margin-bottom: 10px;
-        }
-
-        .popup-divider {
-            height: 1px;
-            background: linear-gradient(90deg, var(--border-glow), transparent);
-            margin: 10px 0;
-        }
-
-        .popup-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .popup-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.78rem;
-        }
-        .popup-row-icon {
-            color: var(--gold-dim);
-            font-size: 0.7rem;
-            width: 14px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .popup-row-label {
-            color: var(--text-dim);
-            font-style: italic;
-            min-width: 62px;
-        }
-        .popup-row-value {
+        .pc-name {
+            font-size: 15px;
+            font-weight: 600;
             color: var(--text);
-            font-family: 'Cinzel', serif;
-            font-size: 0.7rem;
+            line-height: 1.25;
+            margin-bottom: 12px;
         }
 
-        .custom-pin-icon {
-            background: none !important;
-            border: none !important;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+        .pc-sep { height: 1px; background: var(--line); margin-bottom: 10px; }
+
+        .pc-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 5px;
+            font-size: 12px;
         }
-        .custom-pin-icon:hover { filter: drop-shadow(0 0 8px rgba(200,169,110,0.6)); }
+        .pc-label { color: var(--muted); min-width: 68px; flex-shrink: 0; }
+        .pc-val { color: var(--text); font-variant-numeric: tabular-nums; }
+
+        .custom-pin { background: none !important; border: none !important; }
     </style>
 </head>
 <body>
 <div id="app">
     <div id="sidebar">
-        <div class="sidebar-header">
-            <div class="header-eyebrow">Regatul</div>
-            <div class="header-title">Narția</div>
-            <div class="header-sub">Cartografia Tărâmurilor Cunoscute</div>
+        <div class="s-head">
+            <div class="s-title">Narția</div>
+            <div class="s-sub">Hartă interactivă</div>
         </div>
-
-        <div class="ornament" style="margin-top:18px;">
-            <div class="ornament-line"></div>
-            <div class="ornament-diamond"></div>
-            <div class="ornament-line right"></div>
-        </div>
-
-        <div class="section-label">Filtre</div>
-        <div class="categories-list" id="categories-container"></div>
-
-        <div class="sidebar-footer">
-            <div class="footer-status">
-                <div class="status-dot"></div>
-                <span>Hartă sincronizată live</span>
-            </div>
+        <div class="s-section">Categorii</div>
+        <div class="s-list" id="cat-list"></div>
+        <div class="s-foot">
+            <div class="pulse"></div>
+            <span>Sincronizat live</span>
         </div>
     </div>
     <div id="map"></div>
@@ -401,255 +220,139 @@
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const minX = -1344, maxX = 1487, minZ = -880, maxZ = 1247;
+const minX=-1344, maxX=1487, minZ=-880, maxZ=1247;
 
-    const categoriesMap = {
-        oras:     "Orașe",
-        sat:      "Sate",
-        baza:     "Baze",
-        structura:"Structuri",
-        metro:    "Metrouri",
-        port:     "Porturi",
-        pod:      "Poduri"
-    };
+const CATS = {
+    oras:      { label: 'Orașe',     color: '#e05555' },
+    sat:       { label: 'Sate',      color: '#e09045' },
+    baza:      { label: 'Baze',      color: '#c8b840' },
+    structura: { label: 'Structuri', color: '#4ea86a' },
+    metro:     { label: 'Metrouri', color: '#5590de' },
+    port:      { label: 'Porturi',  color: '#9966d4' },
+    pod:       { label: 'Poduri',   color: '#cc5090' }
+};
 
-    const colorMap = {
-        oras:      "#e05252",
-        sat:       "#e8914a",
-        baza:      "#d4c060",
-        structura: "#5aaa6a",
-        metro:     "#5b9de8",
-        port:      "#b07ee0",
-        pod:       "#e060a0"
-    };
+let map, layers = {}, counts = {}, visible = {}, lastCSV = '';
 
-    const iconSVG = {
-        oras:      `<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>`,
-        sat:       `<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>`,
-        default:   `<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>`
-    };
+function pin(color, size) {
+    const s = size || 24;
+    return L.divIcon({
+        html: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${color}"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="0.7"/></svg>`,
+        className: 'custom-pin',
+        iconSize: [s,s], iconAnchor: [s/2,s], popupAnchor: [0,-s]
+    });
+}
 
-    let map, layers;
-    let lastFileContent = "";
-    const markerCounts = {};
-
-    function formatDate(raw) {
-        if (!raw || raw.trim() === '') return null;
-        const s = raw.trim().replace(/\D/g, '');
-        if (s.length === 8) {
-            const d = s.slice(0,2), m = s.slice(2,4), y = s.slice(4,8);
-            const months = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
-            const mIdx = parseInt(m,10) - 1;
-            return `${parseInt(d,10)} ${months[mIdx] || m} ${y}`;
-        }
-        return raw.trim();
+function fmtDate(raw) {
+    if (!raw || !raw.trim()) return null;
+    const s = raw.trim().replace(/\D/g,'');
+    if (s.length === 8) {
+        const mo = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
+        return `${parseInt(s.slice(0,2))} ${mo[parseInt(s.slice(2,4))-1] || s.slice(2,4)} ${s.slice(4)}`;
     }
+    return raw.trim();
+}
 
-    function createPinIcon(color, size = 30) {
-        const s = size;
-        return L.divIcon({
-            html: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <filter id="glow-${color.replace('#','')}">
-                    <feGaussianBlur stdDeviation="1.5" result="blur"/>
-                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                    fill="${color}" stroke="#000" stroke-width="0.8" stroke-linejoin="round"
-                    filter="url(#glow-${color.replace('#','')})"/>
-            </svg>`,
-            className: 'custom-pin-icon',
-            iconSize: [s, s],
-            iconAnchor: [s/2, s],
-            popupAnchor: [0, -s]
-        });
-    }
+function popup(p) {
+    const c = CATS[p.cat] || { label: p.cat, color: '#888' };
+    const col = c.color;
+    const colAlpha = col + '22';
+    const date = fmtDate(p.date);
+    const hasImg = p.img && p.img.trim();
 
-    function buildPopup(point) {
-        const color = colorMap[point.category] || '#888';
-        const typeName = categoriesMap[point.category] || point.category;
-        const dateStr = formatDate(point.date);
-        const hasImage = point.image && point.image.trim() !== '';
-        const hasDate = dateStr !== null;
+    const imgHtml = hasImg
+        ? `<img class="pc-img" src="${p.img.trim()}" alt="${p.name}" onerror="this.style.display='none'">`
+        : `<div class="pc-img-ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="${col}" opacity="0.18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div>`;
 
-        const imageSection = hasImage
-            ? `<img class="popup-thumb" src="${point.image.trim()}" alt="${point.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-               <div class="popup-thumb-placeholder" style="display:none;">
-                 <svg width="40" height="40" viewBox="0 0 24 24" fill="${color}"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-               </div>`
-            : `<div class="popup-thumb-placeholder">
-                 <svg width="40" height="40" viewBox="0 0 24 24" fill="${color}"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-               </div>`;
+    return `<div class="pc">
+        <div class="pc-accent" style="background:${col};"></div>
+        ${imgHtml}
+        <div class="pc-body">
+            <div class="pc-badge" style="background:${colAlpha}; color:${col};">${c.label}</div>
+            <div class="pc-name">${p.name}</div>
+            <div class="pc-sep"></div>
+            <div class="pc-row"><span class="pc-label">Coordonate</span><span class="pc-val">X ${p.x} · Z ${p.z}</span></div>
+            ${date ? `<div class="pc-row"><span class="pc-label">Construit</span><span class="pc-val">${date}</span></div>` : ''}
+        </div>
+    </div>`;
+}
 
-        return `
-        <div class="popup-card">
-            <div class="popup-banner" style="background: linear-gradient(90deg, ${color}66, ${color}22, transparent);"></div>
-            ${imageSection}
-            <div class="popup-body">
-                <div class="popup-type-badge" style="color:${color}; border-color:${color}55;">${typeName}</div>
-                <div class="popup-name">${point.name}</div>
-                <div class="popup-divider"></div>
-                <div class="popup-meta">
-                    <div class="popup-row">
-                        <span class="popup-row-icon">✦</span>
-                        <span class="popup-row-label">Coordonate</span>
-                        <span class="popup-row-value">X: ${point.x} &nbsp;|&nbsp; Z: ${point.z}</span>
-                    </div>
-                    ${hasDate ? `
-                    <div class="popup-row">
-                        <span class="popup-row-icon">◈</span>
-                        <span class="popup-row-label">Construit</span>
-                        <span class="popup-row-value">${dateStr}</span>
-                    </div>` : ''}
-                </div>
-            </div>
-        </div>`;
-    }
+function buildSidebar() {
+    const list = document.getElementById('cat-list');
+    list.innerHTML = '';
+    Object.keys(CATS).forEach(k => {
+        const row = document.createElement('div');
+        row.className = 'cat-row';
+        row.id = 'row-' + k;
+        row.innerHTML = `<div class="cat-dot" style="background:${CATS[k].color};"></div><span class="cat-name">${CATS[k].label}</span><span class="cat-count" id="cnt-${k}">0</span>`;
+        row.addEventListener('click', () => toggle(k));
+        list.appendChild(row);
+    });
+}
 
-    function initSidebar() {
-        const container = document.getElementById('categories-container');
-        container.innerHTML = '';
-        Object.keys(categoriesMap).forEach(key => {
-            const color = colorMap[key];
-            const count = markerCounts[key] || 0;
-            const div = document.createElement('div');
-            div.className = 'cat-item';
-            div.id = `cat-item-${key}`;
-            div.style.setProperty('--c', color);
-            div.innerHTML = `
-                <div class="cat-dot" style="background:${color}; color:${color};"></div>
-                <label class="cat-name" style="color:${color}; cursor:pointer;" for="chk-${key}">${categoriesMap[key]}</label>
-                <span class="cat-count" id="count-${key}">${count}</span>
-                <input type="checkbox" class="cat-checkbox" id="chk-${key}" checked onchange="toggleLayer('${key}')" style="margin-left:10px;">
-            `;
-            div.style.borderLeftColor = color + '66';
-            container.appendChild(div);
-        });
-    }
+function toggle(k) {
+    visible[k] = !visible[k];
+    const row = document.getElementById('row-' + k);
+    if (visible[k]) { layers[k].addTo(map); row.classList.remove('off'); }
+    else { map.removeLayer(layers[k]); row.classList.add('off'); }
+}
 
-    function updateCounts() {
-        Object.keys(categoriesMap).forEach(key => {
-            const el = document.getElementById('count-' + key);
-            if (el) el.textContent = markerCounts[key] || 0;
-        });
-    }
+function mc2ll(x, z, W, H) {
+    return [H - ((z - minZ) / (maxZ - minZ)) * H, ((x - minX) / (maxX - minX)) * W];
+}
 
-    window.toggleLayer = function(key) {
-        const item = document.getElementById('cat-item-' + key);
-        const chk = document.getElementById('chk-' + key);
-        if (map.hasLayer(layers[key])) {
-            map.removeLayer(layers[key]);
-            if (item) item.style.opacity = '0.45';
-        } else {
-            layers[key].addTo(map);
-            if (item) item.style.opacity = '1';
-        }
-    }
+async function fetchCSV(W, H) {
+    try {
+        const r = await fetch('./nartia_date.csv?t=' + Date.now(), { cache:'no-store' });
+        if (!r.ok) return;
+        const text = await r.text();
+        if (text === lastCSV) return;
+        lastCSV = text;
 
-    function minecraftToLeaflet(x, z, W, H) {
-        const pX = (x - minX) / (maxX - minX);
-        const pZ = (z - minZ) / (maxZ - minZ);
-        return [H - pZ * H, pX * W];
-    }
+        Object.keys(CATS).forEach(k => { layers[k].clearLayers(); counts[k] = 0; });
 
-    function renderMarker(point, W, H) {
-        const cat = point.category;
-        if (!layers[cat]) return;
-        const coords = minecraftToLeaflet(point.x, point.z, W, H);
-        const color = colorMap[cat] || '#aaa';
-
-        // Larger pins for cities & towns
-        const size = (cat === 'oras') ? 34 : (cat === 'sat') ? 28 : 26;
-        const icon = createPinIcon(color, size);
-
-        L.marker(coords, { icon })
-            .bindPopup(buildPopup(point), {
-                maxWidth: 270,
-                className: ''
-            })
-            .addTo(layers[cat]);
-
-        markerCounts[cat] = (markerCounts[cat] || 0) + 1;
-    }
-
-    async function fetchLocalCSV(W, H) {
-        try {
-            const res = await fetch('./nartia_date.csv?t=' + Date.now(), { cache: "no-store" });
-            if (!res.ok) return;
-            const text = await res.text();
-            if (text === lastFileContent) return;
-            lastFileContent = text;
-
-            Object.keys(layers).forEach(k => layers[k].clearLayers());
-            Object.keys(categoriesMap).forEach(k => markerCounts[k] = 0);
-
-            const lines = text.split('\n');
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line || line.startsWith('///')) continue;
-                const parts = line.split(',');
-                if (parts.length >= 4) {
-                    renderMarker({
-                        name:     parts[0].trim(),
-                        category: parts[1].trim(),
-                        x:        parseFloat(parts[2]),
-                        z:        parseFloat(parts[3]),
-                        date:     parts[4] ? parts[4].trim() : '',
-                        image:    parts[5] ? parts[5].trim() : ''
-                    }, W, H);
-                }
-            }
-            updateCounts();
-        } catch(e) {
-            console.warn('Eroare CSV:', e);
-        }
-    }
-
-    // Bootstrap
-    const img = new Image();
-    img.onload = function() {
-        const W = this.width, H = this.height;
-        const bounds = [[0,0],[H,W]];
-
-        map = L.map('map', {
-            crs: L.CRS.Simple,
-            minZoom: -2, maxZoom: 3,
-            maxBounds: bounds,
-            maxBoundsViscosity: 0.9,
-            zoomControl: true
+        text.split('\n').slice(1).forEach(line => {
+            line = line.trim();
+            if (!line || line.startsWith('///')) return;
+            const p = line.split(',');
+            if (p.length < 4) return;
+            const pt = { name: p[0].trim(), cat: p[1].trim(), x: +p[2], z: +p[3], date: p[4]||'', img: p[5]||'' };
+            if (!layers[pt.cat]) return;
+            const sz = pt.cat === 'oras' ? 28 : pt.cat === 'sat' ? 24 : 22;
+            L.marker(mc2ll(pt.x, pt.z, W, H), { icon: pin(CATS[pt.cat]?.color || '#888', sz) })
+                .bindPopup(popup(pt), { maxWidth: 250 })
+                .addTo(layers[pt.cat]);
+            counts[pt.cat] = (counts[pt.cat] || 0) + 1;
         });
 
-        L.imageOverlay('harta.png', bounds).addTo(map);
-        map.setView([H/2, W/2], -1);
+        Object.keys(CATS).forEach(k => {
+            const el = document.getElementById('cnt-' + k);
+            if (el) el.textContent = counts[k] || 0;
+        });
+    } catch(e) {}
+}
 
-        layers = {};
-        Object.keys(categoriesMap).forEach(k => {
-            layers[k] = L.layerGroup().addTo(map);
-            markerCounts[k] = 0;
-        });
-
-        initSidebar();
-        fetchLocalCSV(W, H);
-        setInterval(() => fetchLocalCSV(W, H), 3000);
-    };
-    img.onerror = () => {
-        // Demo mode without harta.png — show a placeholder map
-        const W = 2048, H = 1536;
-        const bounds = [[0,0],[H,W]];
-        map = L.map('map', {
-            crs: L.CRS.Simple, minZoom: -2, maxZoom: 3,
-            maxBounds: bounds, maxBoundsViscosity: 0.9
-        });
-        map.setView([H/2, W/2], -1);
-        layers = {};
-        Object.keys(categoriesMap).forEach(k => {
-            layers[k] = L.layerGroup().addTo(map);
-            markerCounts[k] = 0;
-        });
-        initSidebar();
-        fetchLocalCSV(W, H);
-        setInterval(() => fetchLocalCSV(W, H), 3000);
-    };
-    img.src = 'harta.png?v=' + Date.now();
+const img = new Image();
+img.onload = function() {
+    const W = this.width, H = this.height;
+    map = L.map('map', { crs: L.CRS.Simple, minZoom:-2, maxZoom:3, maxBounds:[[0,0],[H,W]], maxBoundsViscosity:0.9 });
+    L.imageOverlay('harta.png', [[0,0],[H,W]]).addTo(map);
+    map.setView([H/2, W/2], -1);
+    Object.keys(CATS).forEach(k => { layers[k] = L.layerGroup().addTo(map); counts[k] = 0; visible[k] = true; });
+    buildSidebar();
+    fetchCSV(W, H);
+    setInterval(() => fetchCSV(W, H), 3000);
+};
+img.onerror = function() {
+    const W=2048, H=1536;
+    map = L.map('map', { crs: L.CRS.Simple, minZoom:-2, maxZoom:3, maxBounds:[[0,0],[H,W]], maxBoundsViscosity:0.9 });
+    map.setView([H/2, W/2], -1);
+    Object.keys(CATS).forEach(k => { layers[k] = L.layerGroup().addTo(map); counts[k] = 0; visible[k] = true; });
+    buildSidebar();
+    fetchCSV(W, H);
+    setInterval(() => fetchCSV(W, H), 3000);
+};
+img.src = 'harta.png?v=' + Date.now();
 </script>
 </body>
 </html>

@@ -165,3 +165,64 @@
                     <div class="cat-item" style="border-left: 4px solid ${color};">
                         <label class="cat-label" for="chk-${key}">
                             <input type="checkbox" id="chk-${key}" checked onchange="toggleLayer('${key}')">
+                            <span style="color: ${color}; font-weight: bold;">${categoriesMap[key]}</span>
+                        </label>
+                    </div>`;
+            });
+        }
+
+        function toggleLayer(key) {
+            if (map.hasLayer(layers[key])) { map.removeLayer(layers[key]); } 
+            else { layers[key].addTo(map); }
+        }
+
+        function renderMarker(point) {
+            const coords = minecraftToLeaflet(point.x, point.z);
+            if (!layers[point.category]) return; 
+
+            const targetColor = colorMap[point.category];
+            const customIcon = createPinIcon(targetColor);
+
+            L.marker(coords, { icon: customIcon })
+                .bindPopup(`<b style="color:${targetColor};">${point.name}</b><br>Coordonate: X: ${point.x} | Z: ${point.z}<br>Tip: ${categoriesMap[point.category]}`)
+                .addTo(layers[point.category]);
+        }
+
+        // --- AUTO-SYNC LOGIC ---
+        async function fetchLocalCSV() {
+            try {
+                const response = await fetch('./nartia_date.csv?t=' + new Date().getTime(), { cache: "no-store" });
+                if (!response.ok) throw new Error("Fișierul nu a fost găsit.");
+
+                const text = await response.text();
+                if (text === lastFileContent) return;
+                lastFileContent = text;
+
+                Object.keys(layers).forEach(key => layers[key].clearLayers());
+
+                const lines = text.split("\n");
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const parts = line.split(",");
+                    if (parts.length === 4) {
+                        renderMarker({
+                            name: parts[0],
+                            category: parts[1],
+                            x: parseFloat(parts[2]),
+                            z: parseFloat(parts[3])
+                        });
+                    }
+                }
+            } catch (error) {
+                console.warn("Sincronizarea automată eșuată. Necesită rulare prin Live Server local.");
+            }
+        }
+
+        initSidebar();
+        fetchLocalCSV();
+        setInterval(fetchLocalCSV, 3000);
+    </script>
+</body>
+</html>
